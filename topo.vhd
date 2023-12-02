@@ -28,7 +28,7 @@ architecture behavior of topo is
     -- constant d: real := 2;
 
     constant vth: real := 30; -- conferir
-    constant l_n: real := 0.5; -- conferir
+    constant I_n: real := 0.5; -- conferir
 
     signal saida_MUX_norte: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_MUX_sul: std_logic_vector(32 downto 0):= (others => '0');
@@ -121,9 +121,9 @@ architecture behavior of topo is
                 saida_reg7 <= (others => '0');
                 saida_reg8 <= (others => '0');
             elsif rising_edge(clk) then
-                saida_reg5 <= saida_reg1 srl (0.04 * (v_n * v_n)); -- conferir
-                saida_reg6 <= v_n sll (5 * v_n); -- conferir
-                saida_reg7 <= l_n;
+                saida_reg5 <= (saida_reg1 srl 5) + (saida_reg1 srl 7); -- 0,03125 + 0,0078125 = 0,0390625 ~ 0,04
+                saida_reg6 <= (v_n sll 2) + v_n; -- 4 * v_n + v_n = 5 * v_n
+                saida_reg7 <= I_n;
                 saida_reg8 <= 140;
             end if;
         end process;
@@ -142,7 +142,7 @@ architecture behavior of topo is
                 saida_reg4 <= (others => '0');
             elsif rising_edge(clk) then
                 saida_reg1 <= fc_cordic;
-                saida_reg2 <= v_n srl (b * v_n); -- conferir
+                saida_reg2 <= (v_n srl 3) + (v_n srl 4) + (v_n srl 7) + (v_n srl 8); -- 0,125 + 0,0625 + 0,0078125 + 0,00390625 = 0,19921875 ~ 0,2 
                 saida_reg3 <= (others => '0') - u_n; -- inversão de sinal
                 saida_reg4 <= saida_reg2 + saida_reg3;
             end if;
