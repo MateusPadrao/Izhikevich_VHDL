@@ -37,6 +37,7 @@ architecture behavior of topo is
     signal saida_MUX_norte: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_MUX_sul: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_comparador: std_logic := '0';
+    signal fc_cordic: std_logic_vector(65 downto 0):= (others => '0');
     
     -- Registradores numerados conforme PNG na pasta --
     signal saida_reg1: std_logic_vector(32 downto 0):= (others => '0');
@@ -55,7 +56,13 @@ architecture behavior of topo is
     signal saida_reg15: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_reg16: std_logic_vector(32 downto 0):= (others => '0');
 
-    signal 
+    -- Auxiliares --
+    signal saida_reg9_aux: std_logic_vector(32 downto 0):= (others => '0');
+    signal saida_reg11_aux: std_logic_vector(32 downto 0):= (others => '0');
+    signal saida_reg11_aux2: std_logic_vector(32 downto 0):= (others => '0');
+    signal saida_reg1_aux: std_logic_vector(32 downto 0):= (others => '0');
+    signal v_n_aux: std_logic_vector(32 downto 0):= (others => '0');
+    signal v_n_aux2: std_logic_vector(32 downto 0):= (others => '0');
 
     begin
         -- REGISTRADORES DE SAÍDA --
