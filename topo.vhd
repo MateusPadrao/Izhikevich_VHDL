@@ -4,6 +4,10 @@ use ieee.numeric_std.all;
 use ieee.std_logic_signed.all;
 
 entity topo is
+    generic (
+        dt: time := 1 ms
+    );
+
     port (
         clk : in std_logic;
         reset : in std_logic;
@@ -99,6 +103,15 @@ architecture behavior of topo is
         end process;
 
         -- REGISTRADORES DE 9 A 11 --
+        -- saida_reg9 recebe dv_n/dt * dt => (0,04 * (v_n ** 2) + 5 * v_n + 140 - u_n + I_n) * dt
+        -- logo, saida_reg9 recebe saida_reg10 deslocada tantos bits a esquerda a depender do valor resultante em dv_n
+        saida_reg9_aux <= saida_reg10 srl 10; -- (vezes necessárias para que seja igual/aproximado a multiplicação por dt) 10 shifts a direita => 0,0009765625 ~ 0,001 = dt
+        
+        -- saida_reg11 recebe du_n/a*dt * dt => a * (b * v_n - u_n) * dt
+        -- logo, saida_reg11 recebe saida_reg4 deslocada tantos bits à direita a depender do valor resultante em du_n
+        saida_reg11_aux <= saida_reg4_aux srl 10; -- (vezes necessárias para que seja igual/aproximado a divisão por dt)
+        saida_reg11_aux2 <= (saida_reg11_aux srl 6) + (saida_reg11_aux srl 8); -- 0,015625 + 0,00390625 = 0,01953125 ~ 0,02
+
         process (clk, reset)
         begin
             if reset = '1' then
@@ -106,13 +119,16 @@ architecture behavior of topo is
                 saida_reg10 <= (others => '0');
                 saida_reg11 <= (others => '0');
             elsif rising_edge(clk) then
-                saida_reg9 <= saida_reg10 sll (d * v_n); -- conferir
+                saida_reg9 <= saida_reg9_aux;               
                 saida_reg10 <= saida_reg3 + saida_reg5 + saida_reg6 + saida_reg7 + saida_reg8;
-                saida_reg11 <= saida_reg4 srl (d * u_n); -- conferir
+                saida_reg11 <= saida_reg11_aux2;                
             end if;
         end process;
 
         -- REGISTRADORES DE 5 A 8 --
+        saida_reg1_aux <= to_stdlogicvector((to_bitvector(saida_reg1) srl 5) + (to_bitvector(saida_reg1) srl 7)); -- 0,03125 + 0,0078125 = 0,0390625 ~ 0,04
+        v_n_aux <= to_stdlogicvector(to_bitvector(v_n) sll 2) + v_n; -- 4 * v_n + v_n = 5 * v_n
+
         process (clk, reset)
         begin
             if reset = '1' then
@@ -121,8 +137,8 @@ architecture behavior of topo is
                 saida_reg7 <= (others => '0');
                 saida_reg8 <= (others => '0');
             elsif rising_edge(clk) then
-                saida_reg5 <= (saida_reg1 srl 5) + (saida_reg1 srl 7); -- 0,03125 + 0,0078125 = 0,0390625 ~ 0,04
-                saida_reg6 <= (v_n sll 2) + v_n; -- 4 * v_n + v_n = 5 * v_n
+                saida_reg5 <= saida_reg1_aux;
+                saida_reg6 <= v_n_aux;
                 saida_reg7 <= I_n;
                 saida_reg8 <= 140;
             end if;
@@ -133,6 +149,8 @@ architecture behavior of topo is
         fc_cordic <= v_n * v_n;
         
         -- REGISTRADORES DE 1 A 4 --
+        v_n_aux2 <= to_stdlogicvector(to_bitvector(v_n) srl 3) + to_stdlogicvector(to_bitvector(v_n) srl 4) + to_stdlogicvector(to_bitvector(v_n) srl 7) + to_stdlogicvector(to_bitvector(v_n) srl 8); -- 0,125 + 0,0625 + 0,0078125 + 0,00390625 = 0,19921875 ~ 0,2
+        
         process (clk, reset)
         begin
             if reset = '1' then
@@ -142,7 +160,7 @@ architecture behavior of topo is
                 saida_reg4 <= (others => '0');
             elsif rising_edge(clk) then
                 saida_reg1 <= fc_cordic;
-                saida_reg2 <= (v_n srl 3) + (v_n srl 4) + (v_n srl 7) + (v_n srl 8); -- 0,125 + 0,0625 + 0,0078125 + 0,00390625 = 0,19921875 ~ 0,2 
+                saida_reg2 <= v_n_aux2;
                 saida_reg3 <= (others => '0') - u_n; -- inversão de sinal
                 saida_reg4 <= saida_reg2 + saida_reg3;
             end if;
