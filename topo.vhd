@@ -22,8 +22,8 @@ architecture behavior of topo is
     -- tonic spiking
     constant a: real := 0.02;
     constant b: real := 0.2;
-    constant c: real := -65;
-    constant d: real := 8;
+    constant c: integer := -65;
+    constant d: integer := 8;
 
     -- tonic bursting
     -- constant a: real := 0.02;
@@ -31,7 +31,7 @@ architecture behavior of topo is
     -- constant c: real := -50;
     -- constant d: real := 2;
 
-    constant vth: real := 30; -- conferir
+    constant vth: integer := 30; -- conferir
     constant I_n: real := 0.5; -- conferir
 
     signal saida_MUX_norte: std_logic_vector(32 downto 0):= (others => '0');
@@ -49,6 +49,7 @@ architecture behavior of topo is
     signal saida_reg7: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_reg8: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_reg9: std_logic_vector(32 downto 0):= (others => '0');
+    signal saida_reg10: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_reg11: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_reg12: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_reg13: std_logic_vector(32 downto 0):= (others => '0');
@@ -112,12 +113,12 @@ architecture behavior of topo is
         -- REGISTRADORES DE 9 A 11 --
         -- saida_reg9 recebe dv_n/dt * dt => (0,04 * (v_n ** 2) + 5 * v_n + 140 - u_n + I_n) * dt
         -- logo, saida_reg9 recebe saida_reg10 deslocada tantos bits a esquerda a depender do valor resultante em dv_n
-        saida_reg9_aux <= saida_reg10 srl 10; -- (vezes necessárias para que seja igual/aproximado a multiplicação por dt) 10 shifts a direita => 0,0009765625 ~ 0,001 = dt
+        saida_reg9_aux <= to_stdlogicvector(to_bitvector(saida_reg10 srl 10)); -- (vezes necessárias para que seja igual/aproximado a multiplicação por dt) 10 shifts a direita => 0,0009765625 ~ 0,001 = dt
         
         -- saida_reg11 recebe du_n/a*dt * dt => a * (b * v_n - u_n) * dt
         -- logo, saida_reg11 recebe saida_reg4 deslocada tantos bits à direita a depender do valor resultante em du_n
-        saida_reg11_aux <= saida_reg4_aux srl 10; -- (vezes necessárias para que seja igual/aproximado a divisão por dt)
-        saida_reg11_aux2 <= (saida_reg11_aux srl 6) + (saida_reg11_aux srl 8); -- 0,015625 + 0,00390625 = 0,01953125 ~ 0,02
+        saida_reg11_aux <= to_stdlogicvector(to_bitvector(saida_reg4 srl 10)); -- (vezes necessárias para que seja igual/aproximado a divisão por dt)
+        saida_reg11_aux2 <= to_stdlogicvector(to_bitvector(saida_reg11_aux srl 6) + to_bitvector(saida_reg11_aux srl 8)); -- 0,015625 + 0,00390625 = 0,01953125 ~ 0,02
 
         process (clk, reset)
         begin
