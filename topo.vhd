@@ -22,8 +22,8 @@ architecture behavior of topo is
     -- tonic spiking
     --constant a: real := 0.02; 
     --constant b: real := 0.2;
-    constant c: integer := -65;
-    constant d: integer := 8;
+    constant c: std_logic_vector(32 downto 0) := "111111111111111111111111110111111"; -- -65
+    constant d: std_logic_vector(32 downto 0) := "000000000000000000000000000001000"; -- 8 
 
     -- tonic bursting
     -- constant a: real := 0.02;
@@ -31,7 +31,7 @@ architecture behavior of topo is
     -- constant c: real := -50;
     -- constant d: real := 2;
 
-    constant vth: integer := 30; -- conferir
+    constant vth: std_logic_vector(32 downto 0) := "00000000000000000000000000011110"; -- 30
     constant I_n: real := 0.5; -- conferir
 
     signal saida_MUX_norte: std_logic_vector(32 downto 0):= (others => '0');
@@ -40,24 +40,25 @@ architecture behavior of topo is
     signal fc_cordic: std_logic_vector(65 downto 0):= (others => '0');
     
     -- Registradores numerados conforme PNG na pasta --
-    signal saida_reg1: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg2: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg3: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg4: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg5: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg6: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg7: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg8: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg9: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg10: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg11: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg12: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg13: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg14: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg15: std_logic_vector(32 downto 0):= (others => '0');
-    signal saida_reg16: std_logic_vector(32 downto 0):= (others => '0');
+    signal saida_reg1: std_logic_vector(32 downto 0);
+    signal saida_reg2: std_logic_vector(32 downto 0);
+    signal saida_reg3: std_logic_vector(32 downto 0);
+    signal saida_reg4: std_logic_vector(32 downto 0);
+    signal saida_reg5: std_logic_vector(32 downto 0);
+    signal saida_reg6: std_logic_vector(32 downto 0);
+    signal saida_reg7: std_logic_vector(32 downto 0);
+    signal saida_reg8: std_logic_vector(32 downto 0);
+    signal saida_reg9: std_logic_vector(32 downto 0);
+    signal saida_reg10: std_logic_vector(32 downto 0);
+    signal saida_reg11: std_logic_vector(32 downto 0);
+    signal saida_reg12: std_logic_vector(32 downto 0);
+    signal saida_reg13: std_logic_vector(32 downto 0);
+    signal saida_reg14: std_logic_vector(32 downto 0);
+    signal saida_reg15: std_logic_vector(32 downto 0);
+    signal saida_reg16: std_logic_vector(32 downto 0);
 
     -- Auxiliares --
+
     signal saida_reg9_aux: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_reg10_aux: std_logic_vector(32 downto 0):= (others => '0');
     --signal saida_reg10_aux2: std_logic_vector(32 downto 0):= (others => '0');
@@ -104,12 +105,11 @@ architecture behavior of topo is
                 saida_reg15 <= (others => '0');
                 saida_reg16 <= (others => '0');
             elsif rising_edge(clk) then
-                saida_reg12 <= to_stdlogicvector(to_bitvector(vth));
+                saida_reg12 <= vth;
                 saida_reg13 <= v_n + saida_reg9;
-                --saida_reg14 <= c;
-                saida_reg14 <= to_stdlogicvector(to_bitvector(c));
+                saida_reg14 <= c;
                 saida_reg15 <= saida_reg11 + u_n;
-                saida_reg16 <= to_stdlogicvector(to_bitvector(d));
+                saida_reg16 <= d;
             end if;
         end process;
 
