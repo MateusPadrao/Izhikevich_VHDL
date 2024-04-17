@@ -173,7 +173,7 @@ architecture behavior of topo is
                 saida_reg3 <= (others => '0');
                 saida_reg4 <= (others => '0');
             elsif rising_edge(clk) then
-                saida_reg1 <= fc_cordic(65 downto 34);
+                saida_reg1 <= fc_cordic(65 downto 33);
                 saida_reg2 <= v_n_aux2;
                 saida_reg3 <= u_n;
                 saida_reg4 <= saida_reg2 - saida_reg3;
