@@ -22,7 +22,7 @@ architecture behavior of topo is
     --constant a: real := 0.02; 
     --constant b: real := 0.2;
     -- constante c recebe -65 formatado em 33 bits, sendo o bit mais significativo o sinal, os 16 bits seguintes a parte inteira e os 16 bits restantes a parte decimal
-    constant c: std_logic_vector(32 downto 0) := "111111111101111111111111111111111"
+    constant c: std_logic_vector(32 downto 0) := "111111111101111111111111111111111";
     -- constante d recebe 8 formatado em 33 bits, sendo o bit mais significativo o sinal, os 16 bits seguintes a parte inteira e os 16 bits restantes a parte decimal
     constant d: std_logic_vector(32 downto 0) := "000000000000010000000000000000000"; -- 8
 
