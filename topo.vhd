@@ -4,9 +4,8 @@ use ieee.numeric_std.all;
 use ieee.std_logic_signed.all;
 
 entity topo is
-    generic (
-        dt: time := 1 ms
-    );
+    
+    -- dt: time := 1 ms -> 0.001 s
 
     port (
         clk : in std_logic;
@@ -22,8 +21,10 @@ architecture behavior of topo is
     -- tonic spiking
     --constant a: real := 0.02; 
     --constant b: real := 0.2;
-    constant c: std_logic_vector(32 downto 0) := "111111111111111111111111110111111"; -- -65
-    constant d: std_logic_vector(32 downto 0) := "000000000000000000000000000001000"; -- 8 
+    -- constante c recebe -65 formatado em 33 bits, sendo o bit mais significativo o sinal, os 16 bits seguintes a parte inteira e os 16 bits restantes a parte decimal
+    constant c: std_logic_vector(32 downto 0) := "111111111101111111111111111111111"
+    -- constante d recebe 8 formatado em 33 bits, sendo o bit mais significativo o sinal, os 16 bits seguintes a parte inteira e os 16 bits restantes a parte decimal
+    constant d: std_logic_vector(32 downto 0) := "000000000000010000000000000000000"; -- 8
 
     -- tonic bursting
     -- constant a: real := 0.02;
@@ -31,8 +32,8 @@ architecture behavior of topo is
     -- constant c: real := -50;
     -- constant d: real := 2;
 
-    constant vth: std_logic_vector(32 downto 0) := "00000000000000000000000000011110"; -- 30
-    constant I_n: real := 0.5; -- conferir
+    constant vth: std_logic_vector(32 downto 0) := "000000000000111100000000000000000"; -- 30
+    constant I_n: std_logic_vector(32 downto 0) := "000000000000000001000000000000000"; -- 0.5
 
     signal saida_MUX_norte: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_MUX_sul: std_logic_vector(32 downto 0):= (others => '0');
@@ -115,15 +116,15 @@ architecture behavior of topo is
 
         -- REGISTRADORES DE 9 A 11 --
         -- saida_reg9 recebe dv_n/dt * dt => (0,04 * (v_n ** 2) + 5 * v_n + 140 - u_n + I_n) * dt
-        -- logo, saida_reg9 recebe saida_reg10 deslocada tantos bits a esquerda a depender do valor resultante em dv_n
-        saida_reg9_aux <= to_stdlogicvector(to_bitvector(saida_reg10 srl 10)); -- (vezes necessárias para que seja igual/aproximado a multiplicação por dt) 10 shifts a direita => 0,0009765625 ~ 0,001 = dt
+        -- logo, saida_reg9 recebe saida_reg10 deslocada tantos bits a esquerda, que é 0,001, então é uma divisão por 1000 feita com shifts a direita
+        saida_reg9_aux <= to_stdlogicvector((to_bitvector(saida_reg10) srl 10) + (to_bitvector(saida_reg10) srl 16)); -- (vezes necessárias para que seja igual/aproximado a multiplicação por dt) 10 shifts a direita + 16 shifts a direita => 0,0009765625 + 0,0000152587890625 = 0,0009918212890625 ~ 0,001
         
         saida_reg10_aux <= saida_reg3 + saida_reg5 + saida_reg6 + saida_reg7 + saida_reg8; -- u_n + 0,04 * (v_n ** 2) + 5 * v_n + 140 + I_n
-        --saida_reg10_aux2 <= saida_reg6 + saida_reg7;
+        -- saida_reg10_aux2 <= saida_reg6 + saida_reg7;
         -- saida_reg11 recebe du_n/a*dt * dt => a * (b * v_n - u_n) * dt
         -- logo, saida_reg11 recebe saida_reg4 deslocada tantos bits à direita a depender do valor resultante em du_n
-        saida_reg11_aux <= to_stdlogicvector(to_bitvector(saida_reg4 srl 10)); -- (vezes necessárias para que seja igual/aproximado a divisão por dt)
-        saida_reg11_aux2 <= to_stdlogicvector(to_bitvector(saida_reg11_aux srl 6) + to_bitvector(saida_reg11_aux srl 8)); -- 0,015625 + 0,00390625 = 0,01953125 ~ 0,02
+        saida_reg11_aux <= to_stdlogicvector((to_bitvector(saida_reg4) srl 10) + (to_bitvector(saida_reg4) srl 16)); -- (vezes necessárias para que seja igual/aproximado a divisão por dt)
+        saida_reg11_aux2 <= to_stdlogicvector((to_bitvector(saida_reg11_aux) srl 6) + (to_bitvector(saida_reg11_aux) srl 8) + (to_bitvector(saida_reg11_aux) srl 12) + (to_bitvector(saida_reg11_aux) srl 13) + (to_bitvector(saida_reg11_aux) srl 14) + (to_bitvector(saida_reg11_aux) srl 15));
 
         process (clk, reset)
         begin
@@ -139,7 +140,7 @@ architecture behavior of topo is
         end process;
 
         -- REGISTRADORES DE 5 A 8 --
-        saida_reg1_aux <= to_stdlogicvector((to_bitvector(saida_reg1) srl 5) + (to_bitvector(saida_reg1) srl 7)); -- 0,03125 + 0,0078125 = 0,0390625 ~ 0,04
+        saida_reg1_aux <= to_stdlogicvector((to_bitvector(saida_reg1) srl 5) + (to_bitvector(saida_reg1) srl 7) + (to_bitvector(saida_reg1) srl 11) + (to_bitvector(saida_reg1) srl 12) + (to_bitvector(saida_reg1) srl 13) + (to_bitvector(saida_reg1) srl 14) + (to_bitvector(saida_reg1) srl 16)); 
         v_n_aux <= to_stdlogicvector(to_bitvector(v_n) sll 2) + v_n; -- 4 * v_n + v_n = 5 * v_n
 
         process (clk, reset)
@@ -152,8 +153,8 @@ architecture behavior of topo is
             elsif rising_edge(clk) then
                 saida_reg5 <= saida_reg1_aux;
                 saida_reg6 <= v_n_aux;
-                saida_reg7 <= to_stdlogicvector(to_bitvector(I_n));
-                saida_reg8 <= to_stdlogicvector(to_bitvector(140));
+                saida_reg7 <= I_n;
+                saida_reg8 <= "000000000100011000000000000000000"; -- 140
             end if;
         end process;
         
@@ -162,7 +163,7 @@ architecture behavior of topo is
         fc_cordic <= v_n * v_n;
         
         -- REGISTRADORES DE 1 A 4 --
-        v_n_aux2 <= to_stdlogicvector(to_bitvector(v_n) srl 3) + to_stdlogicvector(to_bitvector(v_n) srl 4) + to_stdlogicvector(to_bitvector(v_n) srl 7) + to_stdlogicvector(to_bitvector(v_n) srl 8); -- 0,125 + 0,0625 + 0,0078125 + 0,00390625 = 0,19921875 ~ 0,2
+        v_n_aux2 <= (to_stdlogicvector(to_bitvector(v_n) srl 3)) + (to_stdlogicvector(to_bitvector(v_n) srl 4)) + (to_stdlogicvector(to_bitvector(v_n) srl 7)) + (to_stdlogicvector(to_bitvector(v_n) srl 8)) + (to_stdlogicvector(to_bitvector(v_n) srl 11)) + (to_stdlogicvector(to_bitvector(v_n) srl 12)) + (to_stdlogicvector(to_bitvector(v_n) srl 15)) + (to_stdlogicvector(to_bitvector(v_n) srl 16));
         
         process (clk, reset)
         begin
@@ -172,7 +173,7 @@ architecture behavior of topo is
                 saida_reg3 <= (others => '0');
                 saida_reg4 <= (others => '0');
             elsif rising_edge(clk) then
-                saida_reg1 <= fc_cordic;
+                saida_reg1 <= fc_cordic(65 downto 34);
                 saida_reg2 <= v_n_aux2;
                 saida_reg3 <= u_n;
                 saida_reg4 <= saida_reg2 - saida_reg3;
