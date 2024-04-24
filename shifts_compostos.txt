@@ -1,0 +1,11 @@
+Deslocamentos necessários para multiplicar por cada valor fracionário
+
+Até 16 bits fracionários
+
+0,001 -> srl 10 + srl 16
+
+0,02 -> srl 6 + srl8 + srl 12 + srl 13 + srl 14 + srl 15
+
+0,04 -> srl 5 + srl 7 + srl 11 + srl 12 + srl 13 + srl 14 + srl 16
+
+0,2 -> srl 3 + srl 4 + srl 7 + srl 8 + srl 11 + srl 12 + srl 15 + srl 16
