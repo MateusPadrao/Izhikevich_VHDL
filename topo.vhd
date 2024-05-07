@@ -103,8 +103,16 @@ architecture behavior of topo is
 
     begin
         -- SAÍDA --
-        v_n <= saida_MUX_norte;
-        u_n <= saida_MUX_sul;
+        process (clk, reset)
+        begin
+            if reset = '1' then
+                v_n <= (others => '0'); -- verificar valor inicial
+                u_n <= (others => '0'); -- verificar valor inicial
+            elsif rising_edge(clk) then
+                v_n <= saida_MUX_norte;
+                u_n <= saida_MUX_sul;
+            end if;
+        end process;
 
         -- MULTIPLEXADORES --
         saida_MUX_norte <= saida_reg13 when saida_comparador = '0' else saida_reg14;
@@ -174,7 +182,7 @@ architecture behavior of topo is
             end if;
         end process;
 
-        -- REGISTRADORES DE 5 A 8 --
+        -- REGISTRADORES DE 4 A 8 --
         saida_reg1_aux_p1 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 5)); -- parte 1 da composição de somas
         saida_reg1_aux_p2 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 7)); -- parte 2 da composição de somas
         saida_reg1_aux_p3 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 11)); -- parte 3 da composição de somas
@@ -190,11 +198,13 @@ architecture behavior of topo is
         process (clk, reset)
         begin
             if reset = '1' then
+                saida_reg4 <= (others => '0');
                 saida_reg5 <= (others => '0');
                 saida_reg6 <= (others => '0');
                 saida_reg7 <= (others => '0');
                 saida_reg8 <= (others => '0');
             elsif rising_edge(clk) then
+                saida_reg4 <= saida_reg2 - saida_reg3;
                 saida_reg5 <= saida_reg1_aux;
                 saida_reg6 <= v_n_aux;
                 saida_reg7 <= I_n;
@@ -206,7 +216,7 @@ architecture behavior of topo is
 
         fc_cordic <= v_n * v_n;
         
-        -- REGISTRADORES DE 1 A 4 --
+        -- REGISTRADORES DE 1 A 3 --
         v_n_aux2_p1 <= to_stdlogicvector((to_bitvector(v_n) srl 3)); -- parte 1 da composição de somas
         v_n_aux2_p2 <= to_stdlogicvector((to_bitvector(v_n) srl 4)); -- parte 2 da composição de somas
         v_n_aux2_p3 <= to_stdlogicvector((to_bitvector(v_n) srl 7)); -- parte 3 da composição de somas
@@ -224,12 +234,10 @@ architecture behavior of topo is
                 saida_reg1 <= (others => '0');
                 saida_reg2 <= (others => '0');
                 saida_reg3 <= (others => '0');
-                saida_reg4 <= (others => '0');
             elsif rising_edge(clk) then
                 saida_reg1 <= fc_cordic(65 downto 33);
                 saida_reg2 <= v_n_aux2;
                 saida_reg3 <= u_n;
-                saida_reg4 <= saida_reg2 - saida_reg3;
             end if;
         end process;
 end behavior;
