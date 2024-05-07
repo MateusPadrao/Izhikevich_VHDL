@@ -89,6 +89,8 @@ architecture behavior of topo is
     signal saida_reg1_aux_p6: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_reg1_aux_p7: std_logic_vector(32 downto 0):= (others => '0');
 
+    signal v_n_aux_p1: std_logic_vector(32 downto 0):= (others => '0');
+
     signal v_n_aux2_p1: std_logic_vector(32 downto 0):= (others => '0');
     signal v_n_aux2_p2: std_logic_vector(32 downto 0):= (others => '0');
     signal v_n_aux2_p3: std_logic_vector(32 downto 0):= (others => '0');
