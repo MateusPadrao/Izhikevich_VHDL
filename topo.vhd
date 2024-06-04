@@ -106,8 +106,8 @@ architecture behavior of topo is
         process (clk, reset)
         begin
             if reset = '1' then
-                v_n <= (others => '0'); -- verificar valor inicial
-                u_n <= (others => '0'); -- verificar valor inicial
+                v_n <= 111111111101111111111111111111111; -- valor inicial de v_n = -65
+                u_n <= 111111111111100111111111111111111; -- valor inicial de u_n = -13
             elsif rising_edge(clk) then
                 v_n <= saida_MUX_norte;
                 u_n <= saida_MUX_sul;
