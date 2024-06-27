@@ -22,8 +22,8 @@ else:
     a = 0.02
     b = 0.2
 
-vth = 30
-I = 0.5
+vth = 30 # tensão limite para disparo
+I = 0.5 # corrente de entrada
 
 while v < vth:
     v = (0.04 * v ** 2 + 5 * v + 140 - u + I) / 1000 + v
