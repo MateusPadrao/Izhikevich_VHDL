@@ -8,7 +8,7 @@ c = -65
 d = 8
 
 # Parâmetros de simulação
-T = 1000  # Tempo total de simulação em ms
+T = 350  # Tempo total de simulação em ms
 dt = 0.1  # Passo de tempo
 time = np.arange(0, T + dt, dt)  # Vetor de tempo
 
@@ -33,12 +33,13 @@ for t in range(1, len(time)):
         v[t] = c
         u[t] = u[t] + d
 
-# Plotando os resultados
+# Plotando os resultados de u, v e I
 plt.figure(figsize=(10, 6))
 plt.plot(time, v, label="Potencial de Membrana (v)")
+plt.plot(time, u, label="Variável de Recuperação (u)")
 plt.plot(time, I, label="Corrente de Entrada (I)", color='gray', linestyle='--')
 plt.xlabel("Tempo (ms)")
-plt.ylabel("v (mV) / I (pA)")
+plt.ylabel("v (mV)  /   u (mV)  /   I (pA)")
 plt.title("Modelo do Neurônio de Izhikevich")
 plt.legend()
 plt.show()
