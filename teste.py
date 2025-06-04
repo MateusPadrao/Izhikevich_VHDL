@@ -8,22 +8,22 @@ c = -65
 d = 8
 
 # Parâmetros de simulação
-T = 350  # Tempo total de simulação em ms
+T = 5000  # Tempo total de simulação em ms
 dt = 0.1  # Passo de tempo
-time = np.arange(0, T + dt, dt)  # Vetor de tempo
+time = np.arange(0, T, dt)  # Vetor de tempo
 
 # Corrente de entrada
 I = np.zeros_like(time)
-I[1000:2000] = 10  # Estímulo de entrada entre 100 e 200 ms
+I[1000:5000] = 10  # Estímulo de entrada entre 100 e 200 ms -> I = 10 pA
 
 # Inicializando as variáveis
 v = np.full_like(time, c)  # Potencial de membrana
-u = np.zeros_like(time)  # Variável de recuperação
+u = np.full_like(time, -13)  # Variável de recuperação
 
 # Loop de integração
 for t in range(1, len(time)):
-    dv = (0.04 * v[t-1]**2 + 5 * v[t-1] + 140 - u[t-1] + I[t-1]) * dt
-    du = (a * (b * v[t-1] - u[t-1])) * dt
+    dv = (0.04 * v[t-1]**2 + 5 * v[t-1] + 140 - u[t-1] + I[t-1]) * 0.001
+    du = (a * (b * v[t-1] - u[t-1])) * 0.001
 
     v[t] = v[t-1] + dv
     u[t] = u[t-1] + du

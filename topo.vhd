@@ -9,7 +9,9 @@ entity topo is
 
     port (
         clk : in std_logic;
-        reset : in std_logic
+        reset : in std_logic;
+        v_n_out : out std_logic_vector(32 downto 0); -- saida do neurônio para o testbench
+        u_n_out : out std_logic_vector(32 downto 0)  -- saida do neurônio para o testbench
     );
 end entity topo;
 
@@ -29,7 +31,9 @@ architecture behavior of topo is
     -- constant d: real := 2;
 
     constant vth: std_logic_vector(32 downto 0) := "000000000000111100000000000000000"; -- 30
-    constant I_n: std_logic_vector(32 downto 0) := "000000000000000001000000000000000"; -- 0.5
+    -- constant I_n: std_logic_vector(32 downto 0) := "000000000000000001000000000000000"; -- 0.5
+    constant I_n: std_logic_vector(32 downto 0) := "000000000000101000000000000000000"; -- 10
+
 
     signal saida_MUX_norte: std_logic_vector(32 downto 0):= (others => '0');
     signal saida_MUX_sul: std_logic_vector(32 downto 0):= (others => '0');
@@ -113,6 +117,10 @@ architecture behavior of topo is
                 u_n <= saida_MUX_sul;
             end if;
         end process;
+        
+        -- Atribuições concorrentes para as saídas
+        v_n_out <= v_n;
+        u_n_out <= u_n;
 
         -- MULTIPLEXADORES --
         saida_MUX_norte <= saida_reg13 when saida_comparador = '0' else saida_reg14;
@@ -121,7 +129,7 @@ architecture behavior of topo is
         -- COMPARADOR --
         process (saida_reg12, saida_reg13)
         begin
-            if saida_reg12 = saida_reg13 then
+            if saida_reg13 >= saida_reg12 then
                 saida_comparador <= '1';
             else
                 saida_comparador <= '0';
@@ -153,7 +161,7 @@ architecture behavior of topo is
         saida_reg9_aux_p2 <= to_stdlogicvector((to_bitvector(saida_reg10) srl 16)); -- parte 2 da composição de somas
         saida_reg9_aux <= saida_reg9_aux_p1 + saida_reg9_aux_p2; -- soma das partes
         
-        saida_reg10_aux <= saida_reg3 + saida_reg5 + saida_reg6 + saida_reg7 + saida_reg8; -- u_n + 0,04 * (v_n ** 2) + 5 * v_n + 140 + I_n
+        saida_reg10_aux <= saida_reg5 + saida_reg6 + saida_reg7 + saida_reg8 - saida_reg3; -- -u_n + 0,04 * (v_n ** 2) + 5 * v_n + 140 + I_n
         
         -- saida_reg11 recebe du_n/a*dt * dt => a * (b * v_n - u_n) * dt
         -- logo, saida_reg11 recebe saida_reg4 deslocada tantos bits à direita a depender do valor resultante em du_n
