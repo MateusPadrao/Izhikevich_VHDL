@@ -14,7 +14,7 @@ time = np.arange(0, T, dt)  # Vetor de tempo
 
 # Corrente de entrada
 I = np.zeros_like(time)
-I[1000:5000] = 10  # Estímulo de entrada entre 100 e 200 ms -> I = 10 pA
+I[1000:50000] = 10  # Estímulo de entrada entre 100 e 200 ms -> I = 10 pA
 
 # Inicializando as variáveis
 v = np.full_like(time, c)  # Potencial de membrana
