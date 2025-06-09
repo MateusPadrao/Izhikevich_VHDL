@@ -37,6 +37,7 @@ architecture behavior of topo is
     signal saida_comparador: std_logic := '0';
     signal v_n: std_logic_vector(32 downto 0);
     signal u_n: std_logic_vector(32 downto 0);
+    signal first_cycle : std_logic := '1';
     
     -- Registradores numerados conforme PNG na pasta --
     signal saida_reg1: std_logic_vector(32 downto 0);
@@ -94,13 +95,20 @@ architecture behavior of topo is
         -- SAÍDA -- Ciclo 1
         process (clk, reset)
         begin
-            if reset = '1' then
-                v_n <= "111111111101111111111111111111111"; -- valor inicial de v_n = -65
-                u_n <= "111111111111100111111111111111111"; -- valor inicial de u_n = -13
-            elsif rising_edge(clk) then
-                v_n <= saida_MUX_top;
-                u_n <= saida_MUX_down;
+          if reset = '1' then
+            v_n <= "111111111101111111111111111111111"; -- valor inicial de v_n = c
+            u_n <= "111111111111100111111111111111111"; -- valor inicial de u_n = d
+            first_cycle <= '1';
+      	   elsif rising_edge(clk) then
+            if first_cycle = '1' then
+              v_n <= "111111111101111111111111111111111"; -- valor inicial de v_n = c
+              u_n <= "111111111111100111111111111111111"; -- valor inicial de u_n = d
+              first_cycle <= '0';
+            else
+              v_n <= saida_MUX_top;
+              u_n <= saida_MUX_down;
             end if;
+          end if;
         end process;
         
         v_n_out <= v_n;
@@ -136,8 +144,8 @@ architecture behavior of topo is
 
         -- REGISTRADORES DE 11 A 13 -- Ciclo 5
         -- saida_reg11 recebe saida_reg 9 deslocada tantos bits a direita, que eh uma divisao por 1000 feita com shifts a direita
-        saida_reg11_aux_p1 <= to_stdlogicvector((to_bitvector(saida_reg9) srl 10)); -- parte 1 da composicao de somas
-        saida_reg11_aux_p2 <= to_stdlogicvector((to_bitvector(saida_reg9) srl 16)); -- parte 2 da composicao de somas
+        saida_reg11_aux_p1 <= std_logic_vector((signed(saida_reg9) sra 10)); -- parte 1 da composicao de somas
+        saida_reg11_aux_p2 <= std_logic_vector((signed(saida_reg9) sra 16)); -- parte 2 da composicao de somas
         saida_reg11_aux <= saida_reg11_aux_p1 + saida_reg11_aux_p2; -- soma das partes
 
         process (clk, reset)
@@ -148,6 +156,8 @@ architecture behavior of topo is
                 saida_reg13 <= (others => '0');
             elsif rising_edge(clk) then
                 saida_reg11 <= saida_reg11_aux; -- dv_n/dt
+                -- A linha de código com os castings explícitos
+                --saida_reg11 <= std_logic_vector(signed(saida_reg9) / 1000);
                 saida_reg12 <= saida_reg10 + u_n;
                 saida_reg13 <= d; -- constante d
             end if;
@@ -155,9 +165,9 @@ architecture behavior of topo is
 
         -- REGISTRADORES DE 9 E 10 -- Ciclo 4
         -- saida_reg10 recebe saida_reg8 deslocada tantos bits a direita, que eh uma divisao por 5000 feita com shifts a direita
-        saida_reg10_aux_p1 <= to_stdlogicvector((to_bitvector(saida_reg8) srl 13)); -- parte 1 da composicao de somas
-        saida_reg10_aux_p2 <= to_stdlogicvector((to_bitvector(saida_reg8) srl 14)); -- parte 2 da composicao de somas
-        saida_reg10_aux_p3 <= to_stdlogicvector((to_bitvector(saida_reg8) srl 16)); -- parte 3 da composicao de somas
+        saida_reg10_aux_p1 <= std_logic_vector((signed(saida_reg8) sra 13)); -- parte 1 da composicao de somas
+        saida_reg10_aux_p2 <= std_logic_vector((signed(saida_reg8) sra 14)); -- parte 2 da composicao de somas
+        saida_reg10_aux_p3 <= std_logic_vector((signed(saida_reg8) sra 16)); -- parte 3 da composicao de somas
         saida_reg10_aux <= saida_reg10_aux_p1 + saida_reg10_aux_p2 + saida_reg10_aux_p3; -- soma das partes
         
         process (clk, reset)
@@ -173,16 +183,16 @@ architecture behavior of topo is
 
         -- REGISTRADORES DE 4 A 8 -- Ciclo 3
         -- saida_reg4 recebe saida_reg1 deslocada tantos bits a direita, que eh uma divisao por 25 feita com shifts a direita
-        saida_reg4_aux_p1 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 5)); -- parte 1 da composicao de somas
-        saida_reg4_aux_p2 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 7)); -- parte 2 da composicao de somas
-        saida_reg4_aux_p3 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 11)); -- parte 3 da composicao de somas
-        saida_reg4_aux_p4 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 12)); -- parte 4 da composicao de somas
-        saida_reg4_aux_p5 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 13)); -- parte 5 da composicao de somas
-        saida_reg4_aux_p6 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 14)); -- parte 6 da composicao de somas
-        saida_reg4_aux_p7 <= to_stdlogicvector((to_bitvector(saida_reg1) srl 16)); -- parte 7 da composicao de somas
+        saida_reg4_aux_p1 <= std_logic_vector((signed(saida_reg1) sra 5)); -- parte 1 da composicao de somas
+        saida_reg4_aux_p2 <= std_logic_vector((signed(saida_reg1) sra 7)); -- parte 2 da composicao de somas
+        saida_reg4_aux_p3 <= std_logic_vector((signed(saida_reg1) sra 11)); -- parte 3 da composicao de somas
+        saida_reg4_aux_p4 <= std_logic_vector((signed(saida_reg1) sra 12)); -- parte 4 da composicao de somas
+        saida_reg4_aux_p5 <= std_logic_vector((signed(saida_reg1) sra 13)); -- parte 5 da composicao de somas
+        saida_reg4_aux_p6 <= std_logic_vector((signed(saida_reg1) sra 14)); -- parte 6 da composicao de somas
+        saida_reg4_aux_p7 <= std_logic_vector((signed(saida_reg1) sra 16)); -- parte 7 da composicao de somas
         saida_reg4_aux <= saida_reg4_aux_p1 + saida_reg4_aux_p2 + saida_reg4_aux_p3 + saida_reg4_aux_p4 + saida_reg4_aux_p5 + saida_reg4_aux_p6 + saida_reg4_aux_p7; -- soma das partes
 
-        saida_reg5_aux_p1 <= to_stdlogicvector((to_bitvector(v_n) sll 2)); 
+        saida_reg5_aux_p1 <= std_logic_vector((signed(v_n) sll 2)); 
         saida_reg5_aux <= saida_reg5_aux_p1 + v_n; -- saida_reg2 * 5
 
         process (clk, reset)
@@ -204,17 +214,17 @@ architecture behavior of topo is
 
         -- REGISTRADORES DE 1 A 3 -- Ciclo 2
         -- saida_reg2 recebe b * v_n, onde b = 0.2, logo, saida_reg2 recebe v_n deslocado tantos bits a direita, que eh uma divisao por 5 feita com shifts a direita
-        saida_reg2_aux_p1 <= to_stdlogicvector((to_bitvector(v_n) srl 3)); -- parte 1 da composicao de somas
-        saida_reg2_aux_p2 <= to_stdlogicvector((to_bitvector(v_n) srl 4)); -- parte 2 da composicao de somas
-        saida_reg2_aux_p3 <= to_stdlogicvector((to_bitvector(v_n) srl 7)); -- parte 3 da composicao de somas
-        saida_reg2_aux_p4 <= to_stdlogicvector((to_bitvector(v_n) srl 8)); -- parte 4 da composicao de somas
-        saida_reg2_aux_p5 <= to_stdlogicvector((to_bitvector(v_n) srl 11)); -- parte 5 da composicao de somas
-        saida_reg2_aux_p6 <= to_stdlogicvector((to_bitvector(v_n) srl 12)); -- parte 6 da composicao de somas
-        saida_reg2_aux_p7 <= to_stdlogicvector((to_bitvector(v_n) srl 15)); -- parte 7 da composicao de somas
-        saida_reg2_aux_p8 <= to_stdlogicvector((to_bitvector(v_n) srl 16)); -- parte 8 da composicao de somas
+        saida_reg2_aux_p1 <= std_logic_vector((signed(v_n) sra 3)); -- parte 1 da composicao de somas
+        saida_reg2_aux_p2 <= std_logic_vector((signed(v_n) sra 4)); -- parte 2 da composicao de somas
+        saida_reg2_aux_p3 <= std_logic_vector((signed(v_n) sra 7)); -- parte 3 da composicao de somas
+        saida_reg2_aux_p4 <= std_logic_vector((signed(v_n) sra 8)); -- parte 4 da composicao de somas
+        saida_reg2_aux_p5 <= std_logic_vector((signed(v_n) sra 11)); -- parte 5 da composicao de somas
+        saida_reg2_aux_p6 <= std_logic_vector((signed(v_n) sra 12)); -- parte 6 da composicao de somas
+        saida_reg2_aux_p7 <= std_logic_vector((signed(v_n) sra 15)); -- parte 7 da composicao de somas
+        saida_reg2_aux_p8 <= std_logic_vector((signed(v_n) sra 16)); -- parte 8 da composicao de somas
         saida_reg2_aux <= saida_reg2_aux_p1 + saida_reg2_aux_p2 + saida_reg2_aux_p3 + saida_reg2_aux_p4 + saida_reg2_aux_p5 + saida_reg2_aux_p6 + saida_reg2_aux_p7 + saida_reg2_aux_p8; -- soma das partes
 
-        multiplicacao <= v_n * v_n;
+        multiplicacao <= std_logic_vector(signed(v_n) * signed(v_n));
         
         process (clk, reset)
         begin
@@ -223,7 +233,8 @@ architecture behavior of topo is
                 saida_reg2 <= (others => '0');
                 saida_reg3 <= (others => '0');
             elsif rising_edge(clk) then
-                saida_reg1 <= multiplicacao(65 downto 33); -- v_n * v_n, 66 bits, pega os 33 bits mais significativos
+                saida_reg1 <= multiplicacao(48 downto 16); -- v_n * v_n, 66 bits, pega os 33 bits mais significativos
+                --saida_reg1 <= std_logic_vector(resize(signed(v_n) * signed(v_n), 33));
                 saida_reg2 <= saida_reg2_aux; -- b * v_n
                 saida_reg3 <= u_n;
             end if;

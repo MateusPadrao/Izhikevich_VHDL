@@ -16,6 +16,9 @@ architecture sim of tb_topo is
     signal v_n_out   : std_logic_vector(32 downto 0);
     signal u_n_out   : std_logic_vector(32 downto 0);
 
+    -- Sinal para monitorar o valor do contador na simulação
+    signal contador_sig : integer := 1;
+
     file f_saida : text open write_mode is "saida_neuronio.txt";
 
     -- Componente a ser testado
@@ -44,18 +47,21 @@ begin
 
     process
         variable linha : line;
-        variable contador : integer := 0;
+        variable contador : integer := 1; -- Inicia em 1
     begin
         -- Reset ativo por 40 ns
         wait for 40 ns;
         reset <= '0';
 
-        -- Coleta de dados por 200 ciclos de clock
-        for i in 0 to 199 loop -- verificar se 200 ciclos é o bastante
+        
+        for i in 0 to 5000 loop 
             wait until rising_edge(clk);
-            
+
+            -- Atualiza o sinal para visualização na simulação
+            contador_sig <= contador;
+
             -- Coleta dados apenas a cada 6 ciclos
-            if contador = 0 then
+            if contador = 1 then
                 write(linha, string'("Ciclo "));
                 write(linha, i);
                 write(linha, string'(": v_n = "));
@@ -64,9 +70,13 @@ begin
                 write(linha, u_n_out);
                 writeline(f_saida, linha);
             end if;
-            
-            -- Incrementa e reinicia o contador a cada 6 ciclos
-            contador := (contador + 1) mod 6;
+
+            -- Incrementa e reinicia o contador de 1 a 6
+            if contador = 6 then
+                contador := 1;
+            else
+                contador := contador + 1;
+            end if;
         end loop;
 
         wait; -- Fim da simulação
