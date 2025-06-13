@@ -10,8 +10,13 @@ entity topo is
     port (
         clk : in std_logic;
         reset : in std_logic;
-        v_n_out : out std_logic_vector(32 downto 0); -- saida do neurônio para o testbench
-        u_n_out : out std_logic_vector(32 downto 0)  -- saida do neurônio para o testbench
+        enable_entrada : in std_logic; -- habilita a saida do topo
+        enable_reg1_3 : in std_logic;
+        enable_reg4_8 : in std_logic;
+        enable_reg9_10 : in std_logic;
+        enable_reg11_15 : in std_logic;
+        v_n_out : out std_logic_vector(32 downto 0);
+        u_n_out : out std_logic_vector(32 downto 0)
     );
 end entity topo;
 
@@ -55,12 +60,11 @@ architecture behavior of topo is
     signal saida_reg13: std_logic_vector(32 downto 0);
     signal saida_reg14: std_logic_vector(32 downto 0);
     signal saida_reg15: std_logic_vector(32 downto 0);
-    signal saida_reg16: std_logic_vector(32 downto 0);
 
     -- Auxiliares para shifts compostos --
-    signal saida_reg11_aux: std_logic_vector(32 downto 0);
-    signal saida_reg11_aux_p1: std_logic_vector(32 downto 0);
-    signal saida_reg11_aux_p2: std_logic_vector(32 downto 0);
+    signal saida_desloc: std_logic_vector(32 downto 0);
+    signal saida_desloc_p1: std_logic_vector(32 downto 0);
+    signal saida_desloc_p2: std_logic_vector(32 downto 0);
 
     signal saida_reg10_aux: std_logic_vector(32 downto 0);
     signal saida_reg10_aux_p1: std_logic_vector(32 downto 0);
@@ -95,71 +99,64 @@ architecture behavior of topo is
         -- SAÍDA -- Ciclo 1
         process (clk, reset)
         begin
-          if reset = '1' then
-            v_n <= "111111111101111111111111111111111"; -- valor inicial de v_n = c
-            u_n <= "111111111111100111111111111111111"; -- valor inicial de u_n = d
-            first_cycle <= '1';
-      	   elsif rising_edge(clk) then
-            if first_cycle = '1' then
-              v_n <= "111111111101111111111111111111111"; -- valor inicial de v_n = c
-              u_n <= "111111111111100111111111111111111"; -- valor inicial de u_n = d
-              first_cycle <= '0';
-            else
-              v_n <= saida_MUX_top;
-              u_n <= saida_MUX_down;
+            if reset = '1' then
+                v_n <= c; -- valor inicial de v_n = -65
+                u_n <= "111111111111100111111111111111111"; -- valor inicial de u_n = d
+                first_cycle <= '1';
+            elsif rising_edge(clk) then
+                if enable_entrada = '1' then
+                  if first_cycle = '1' then
+                    v_n <= c; -- valor inicial de v_n = -65
+                    u_n <= "111111111111100111111111111111111"; -- valor inicial de u_n = -13
+                    first_cycle <= '0';
+                  elsif first_cycle = '0' then
+                    v_n <= saida_MUX_top; -- v_n recebe o valor do multiplexador de cima
+                    u_n <= saida_MUX_down; -- u_n recebe o valor do multiplexador de baixo
+
+                 	end if;
+                end if;
             end if;
-          end if;
         end process;
         
         v_n_out <= v_n;
         u_n_out <= u_n;
 
         -- MULTIPLEXADORES --
-        saida_MUX_top <= saida_reg15 when saida_comparador = '0' else saida_reg16;
-        saida_MUX_down <= saida_reg12 when saida_comparador = '0' else (saida_reg12 + saida_reg13);
+        saida_MUX_top <= saida_reg12 when saida_comparador = '0' else saida_reg13;
+        saida_MUX_down <= saida_reg14 when saida_comparador = '0' else (saida_reg14 + saida_reg15);
 
         -- COMPARADOR --
-        process (saida_reg14, saida_reg15)
+        process (saida_reg11, saida_reg12)
         begin
-            if saida_reg15 >= saida_reg14 then
+            if saida_reg12 >= saida_reg11 then
                 saida_comparador <= '1';
             else
                 saida_comparador <= '0';
             end if;
         end process;
 
-        -- REGISTRADORES DE 14 A 16 -- Ciclo 6
-        process (clk, reset)
-        begin
-            if reset = '1' then
-                saida_reg14 <= (others => '0');
-                saida_reg15 <= (others => '0');
-                saida_reg16 <= (others => '0');
-            elsif rising_edge(clk) then
-                saida_reg14 <= vth;
-                saida_reg15 <= saida_reg11 + v_n;
-                saida_reg16 <= c;
-            end if;
-        end process;
-
-        -- REGISTRADORES DE 11 A 13 -- Ciclo 5
-        -- saida_reg11 recebe saida_reg 9 deslocada tantos bits a direita, que eh uma divisao por 1000 feita com shifts a direita
-        saida_reg11_aux_p1 <= std_logic_vector((signed(saida_reg9) sra 10)); -- parte 1 da composicao de somas
-        saida_reg11_aux_p2 <= std_logic_vector((signed(saida_reg9) sra 16)); -- parte 2 da composicao de somas
-        saida_reg11_aux <= saida_reg11_aux_p1 + saida_reg11_aux_p2; -- soma das partes
+        -- REGISTRADORES DE 11 A 15 -- Ciclo 5
+        -- saida_desloc recebe saida_reg 9 deslocada tantos bits a direita, que eh uma divisao por 1000 feita com shifts a direita
+        saida_desloc_p1 <= std_logic_vector((signed(saida_reg9) sra 10)); -- parte 1 da composicao de somas
+        saida_desloc_p2 <= std_logic_vector((signed(saida_reg9) sra 16)); -- parte 2 da composicao de somas
+        saida_desloc <= saida_desloc_p1 + saida_desloc_p2; -- soma das partes
 
         process (clk, reset)
         begin
             if reset = '1' then
-                saida_reg11 <= (others => '0');
+                saida_reg11 <= vth;
                 saida_reg12 <= (others => '0');
-                saida_reg13 <= (others => '0');
+                saida_reg13 <= c;
+                saida_reg14 <= (others => '0');
+                saida_reg15 <= d;
             elsif rising_edge(clk) then
-                saida_reg11 <= saida_reg11_aux; -- dv_n/dt
-                -- A linha de código com os castings explícitos
-                --saida_reg11 <= std_logic_vector(signed(saida_reg9) / 1000);
-                saida_reg12 <= saida_reg10 + u_n;
-                saida_reg13 <= d; -- constante d
+                if enable_reg11_15 = '1' then
+                    saida_reg11 <= vth;
+                    saida_reg12 <= saida_desloc + v_n;
+                    saida_reg13 <= c;
+                    saida_reg14 <= saida_reg10 + u_n;
+                    saida_reg15 <= d;
+                end if;
             end if;
         end process;
 
@@ -176,9 +173,11 @@ architecture behavior of topo is
                 saida_reg9 <= (others => '0');
                 saida_reg10 <= (others => '0');
             elsif rising_edge(clk) then
-                saida_reg9 <= saida_reg4 + saida_reg5 + saida_reg6 + saida_reg7 - saida_reg3;
-                saida_reg10 <= saida_reg10_aux; -- du_n/(a*dt) -> du_n
-        end if;
+                if enable_reg9_10 = '1' then
+                    saida_reg9 <= saida_reg4 + saida_reg5 + saida_reg6 + saida_reg7 - saida_reg3;
+                    saida_reg10 <= saida_reg10_aux; -- du_n/(a*dt) -> du_n
+                end if;
+            end if;
         end process;
 
         -- REGISTRADORES DE 4 A 8 -- Ciclo 3
@@ -200,15 +199,17 @@ architecture behavior of topo is
             if reset = '1' then
                 saida_reg4 <= (others => '0');
                 saida_reg5 <= (others => '0');
-                saida_reg6 <= (others => '0');
-                saida_reg7 <= (others => '0');
-                saida_reg8 <= (others => '0');
-            elsif rising_edge(clk) then
-                saida_reg4 <= saida_reg4_aux;
-                saida_reg5 <= saida_reg5_aux; -- saida_reg1 * 5
                 saida_reg6 <= "000000000000101000000000000000000"; -- I_n = 10
                 saida_reg7 <= "000000000100011000000000000000000"; -- 140 
-                saida_reg8 <= saida_reg2 - saida_reg3;
+                saida_reg8 <= (others => '0');
+            elsif rising_edge(clk) then
+                if enable_reg4_8 = '1' then
+                    saida_reg4 <= saida_reg4_aux;
+                    saida_reg5 <= saida_reg5_aux; -- saida_reg1 * 5
+                    saida_reg6 <= "000000000000101000000000000000000"; -- I_n = 10
+                    saida_reg7 <= "000000000100011000000000000000000"; -- 140 
+                    saida_reg8 <= saida_reg2 - saida_reg3;
+                end if;
             end if;
         end process;
 
@@ -233,10 +234,12 @@ architecture behavior of topo is
                 saida_reg2 <= (others => '0');
                 saida_reg3 <= (others => '0');
             elsif rising_edge(clk) then
-                saida_reg1 <= multiplicacao(48 downto 16); -- v_n * v_n, 66 bits, pega os 33 bits mais significativos
-                --saida_reg1 <= std_logic_vector(resize(signed(v_n) * signed(v_n), 33));
-                saida_reg2 <= saida_reg2_aux; -- b * v_n
-                saida_reg3 <= u_n;
+                if enable_reg1_3 = '1' then
+                    saida_reg1 <= multiplicacao(48 downto 16); -- v_n * v_n, 66 bits, pega os 33 bits mais significativos
+                    saida_reg2 <= saida_reg2_aux; -- b * v_n
+                    saida_reg3 <= u_n;
+                end if;
             end if;
         end process;
 end behavior;
+
