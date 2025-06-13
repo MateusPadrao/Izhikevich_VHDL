@@ -11,6 +11,7 @@ Este projeto implementa uma arquitetura multiciclo de um modelo de neurônio de 
 - **teste2.py**: Simulação em software do modelo de neurônio usando Python (*segunda versão*)
 - **circuito_FCCordic.png**: Diagrama do circuito implementado
 - **circ.circ**: Diagrama do Logisim de uma versão com mais registradores alcançando uma latência de 6 ciclos
+- **circ_original.circ**: Diagrama do Logisim com menos registradores e uma latência de 5 ciclos
 
 ## Modelo de Neurônio
 
