@@ -8,13 +8,12 @@ c = -65
 d = 8
 
 # Parâmetros de simulação
-T = 5000  # Tempo total de simulação em ms
-dt = 0.1  # Passo de tempo
+T = 100  # Tempo total de simulação em ms
+dt = 0.001  # Passo de tempo
 time = np.arange(0, T, dt)  # Vetor de tempo
 
 # Corrente de entrada
-I = np.zeros_like(time)
-I[1000:50000] = 10  # Estímulo de entrada entre 100 e 200 ms -> I = 10 pA
+I = np.full_like(time, 10)  # Corrente constante de 10 pA
 
 # Inicializando as variáveis
 v = np.full_like(time, c)  # Potencial de membrana
@@ -34,7 +33,7 @@ for t in range(1, len(time)):
         u[t] = u[t] + d
 
 # Plotando os resultados de u, v e I
-plt.figure(figsize=(10, 6))
+'''plt.figure(figsize=(10, 6))
 plt.plot(time, v, label="Potencial de Membrana (v)")
 plt.plot(time, u, label="Variável de Recuperação (u)")
 plt.plot(time, I, label="Corrente de Entrada (I)", color='gray', linestyle='--')
@@ -42,4 +41,10 @@ plt.xlabel("Tempo (ms)")
 plt.ylabel("v (mV)  /   u (mV)  /   I (pA)")
 plt.title("Modelo do Neurônio de Izhikevich")
 plt.legend()
-plt.show()
+plt.show()'''
+
+# salvando os dados em um arquivo .txt
+with open('saida_Python.txt', 'w') as f:
+    for t in range(len(time)):
+        f.write(f"{v[t]} {u[t]}\n")
+

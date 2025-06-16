@@ -5,3 +5,8 @@ saida_simulacao.txt
 circ_original.circ
 izhi_data.txt
 circ_original.circ
+analise.py
+BinToDecConverter.py
+saida_Python_reduzida.txt
+saida_Python.txt
+saida_VHDL_decimal.txt

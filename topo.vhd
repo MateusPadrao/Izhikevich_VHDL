@@ -25,7 +25,7 @@ architecture behavior of topo is
     -- constant a: real := 0.02; 
     -- constant b: real := 0.2;
     -- constante c recebe -65 formatado em 33 bits, sendo o bit mais significativo o sinal, os 16 bits seguintes a parte inteira e os 16 bits restantes a parte decimal
-    constant c: std_logic_vector(32 downto 0) := "111111111101111111111111111111111";
+    constant c: std_logic_vector(32 downto 0) := "111111111101111110000000000000000"; -- -65
     -- constante d recebe 8 formatado em 33 bits, sendo o bit mais significativo o sinal, os 16 bits seguintes a parte inteira e os 16 bits restantes a parte decimal
     constant d: std_logic_vector(32 downto 0) := "000000000000010000000000000000000"; -- 8
 
@@ -101,18 +101,17 @@ architecture behavior of topo is
         begin
             if reset = '1' then
                 v_n <= c; -- valor inicial de v_n = -65
-                u_n <= "111111111111100111111111111111111"; -- valor inicial de u_n = d
+                u_n <= "111111111111100110000000000000000"; -- valor inicial de u_n = -13
                 first_cycle <= '1';
             elsif rising_edge(clk) then
                 if enable_entrada = '1' then
                   if first_cycle = '1' then
                     v_n <= c; -- valor inicial de v_n = -65
-                    u_n <= "111111111111100111111111111111111"; -- valor inicial de u_n = -13
+                    u_n <= "111111111111100110000000000000000"; -- valor inicial de u_n = -13
                     first_cycle <= '0';
                   elsif first_cycle = '0' then
                     v_n <= saida_MUX_top; -- v_n recebe o valor do multiplexador de cima
                     u_n <= saida_MUX_down; -- u_n recebe o valor do multiplexador de baixo
-
                  	end if;
                 end if;
             end if;
