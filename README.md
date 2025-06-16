@@ -43,7 +43,7 @@ A implementação em hardware usa:
 
 ## Simulação
 
-O testbench simula o neurônio por 5000 ciclos de clock, coletando dados a cada 5 ciclos (correspondendo ao caminho crítico da arquitetura). Os resultados são gravados em um arquivo de texto para análise posterior.
+O testbench simula o neurônio por 50000 ciclos de clock, coletando dados a cada 5 ciclos (correspondendo ao caminho crítico da arquitetura). Os resultados são gravados em um arquivo de texto para análise posterior.
 
 ## Parâmetros do Modelo
 
