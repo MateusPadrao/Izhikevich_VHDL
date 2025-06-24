@@ -5,7 +5,6 @@ Este projeto implementa uma arquitetura multiciclo de um modelo de neurônio de 
 ## Estrutura do Projeto
 
 - **topo.vhd**: Implementação principal do neurônio, contendo todos os registradores e lógica para calcular as equações do modelo
-- **(NÃO UTILIZADO) fc_cordic.vhd**: Módulo para cálculo de multiplicação usando o algoritmo CORDIC 
 - **tb_topo.vhd**: Testbench para simulação do neurônio
 - **teste.py**: Simulação em software do modelo de neurônio usando Python
 - **teste2.py**: Simulação em software do modelo de neurônio usando Python (*segunda versão*)
@@ -39,12 +38,12 @@ A implementação em hardware usa:
 
 - Representação em ponto fixo de 33 bits (1 bit de sinal, 16 bits de parte inteira, 16 bits de parte fracionária)
 - Aproximação de multiplicações por constantes usando shifts e somas
-- Caminho de dados com latência de 6 ciclos de clock
+- Caminho de dados com latência de 5 ciclos de clock
 - Registradores para armazenar estados intermediários
 
 ## Simulação
 
-O testbench simula o neurônio por 200 ciclos de clock (verificar se 200 são suficientes), coletando dados a cada 6 ciclos (correspondendo ao caminho crítico da arquitetura). Os resultados são gravados em um arquivo de texto para análise posterior.
+O testbench simula o neurônio por 50000 ciclos de clock, coletando dados a cada 5 ciclos (correspondendo ao caminho crítico da arquitetura). Os resultados são gravados em um arquivo de texto para análise posterior.
 
 ## Parâmetros do Modelo
 
